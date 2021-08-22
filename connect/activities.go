@@ -34,11 +34,19 @@ func init() {
 
 	activitiesViewCmd := &cobra.Command{
 		Use:   "view <activity id>",
-		Short: "View details for an activity",
+		Short: "View an activity",
 		Run:   activitiesView,
 		Args:  cobra.ExactArgs(1),
 	}
 	activitiesCmd.AddCommand(activitiesViewCmd)
+
+	activitiesViewDetailsCmd := &cobra.Command{
+		Use:   "details <activity id>",
+		Short: "View details for an activity",
+		Run:   activitiesViewDetails,
+		Args:  cobra.ExactArgs(2),
+	}
+	activitiesCmd.AddCommand(activitiesViewDetailsCmd)
 
 	activitiesViewWeatherCmd := &cobra.Command{
 		Use:   "weather <activity id>",
@@ -119,6 +127,23 @@ func activitiesView(_ *cobra.Command, args []string) {
 	t := NewTabular()
 	t.AddValue("ID", activity.ID)
 	t.AddValue("Name", activity.ActivityName)
+	t.Output(os.Stdout)
+}
+
+func activitiesViewDetails(_ *cobra.Command, args []string) {
+	activityID, err := strconv.Atoi(args[0])
+	bail(err)
+	maxChartSize, err := strconv.Atoi(args[1])
+	bail(err)
+
+	activity, err := client.ActivityDetails(activityID, maxChartSize)
+	bail(err)
+
+	t := NewTabular()
+	t.AddValue("ID", activity.ActivityId)
+	t.AddValue("Measurement Count", activity.MeasurementCount)
+	t.AddValue("Metrics Count", activity.MetricsCount)
+	t.AddValue("Details Available", activity.DetailsAvailable)
 	t.Output(os.Stdout)
 }
 
